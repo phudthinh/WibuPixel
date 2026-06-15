@@ -33,12 +33,13 @@ public class NarutoClone : MonoBehaviourPunCallbacks
     }
     private State currentState = State.Run;
 
-    public void SetAttackInfo(string ofPlayerValue, float timeHitboxValue, string playerName, string champName)
+    public void SetAttackInfo(string ofPlayerValue, float timeHitboxValue, string playerName, string champName, int directionValue)
     {
         _ofPlayer = ofPlayerValue;
         _timeHitbox = timeHitboxValue;
         _playerNameText.text = playerName;
         _champNameText.text = champName;
+        _direction = directionValue;
     }
     void Awake()
     {
@@ -59,8 +60,6 @@ public class NarutoClone : MonoBehaviourPunCallbacks
             gameObject.tag = "Player02";
         }
 
-        Random rand = new Random(); 
-        _direction = rand.Next(0, 2) == 0 ? 1 : -1;  
         _rb = GetComponent<Rigidbody2D>();
     }
     void Update()
@@ -79,10 +78,14 @@ public class NarutoClone : MonoBehaviourPunCallbacks
         if(_direction == 1)
         {
             transform.localScale = new Vector2(1, 1);
+            _playerNameText.transform.localScale = new Vector2(1, 1);
+            _champNameText.transform.localScale = new Vector2(1, 1);
         }
         else
         {
             transform.localScale = new Vector2(-1, 1);
+            _playerNameText.transform.localScale = new Vector2(-1, 1);
+            _champNameText.transform.localScale = new Vector2(-1, 1);
         }
 
         _rb.linearVelocity = new Vector2(_speedFly * _direction, 0);

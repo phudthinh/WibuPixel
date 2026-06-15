@@ -976,8 +976,8 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     IEnumerator TimeUnSkill02(float time)
     {
         yield return new WaitForSeconds(time);
-        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text);
-        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text);
+        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text, -1);
+        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text, 1);
         _skill02 = false;
     }
     private void Skill03()
@@ -1395,13 +1395,13 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     }
     
     [PunRPC]
-    private void ShowNarutoClone(Vector2 newPosition, float timeHitbox, string playerName, string champName)
+    private void ShowNarutoClone(Vector2 newPosition, float timeHitbox, string playerName, string champName, int direction)
     {
         GameObject _powerSkill02 = Instantiate(_skill02Prefab, newPosition, Quaternion.identity);
         NarutoClone powerSkill02Component = _powerSkill02.GetComponent<NarutoClone>();
         if (powerSkill02Component != null)
         {
-            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, playerName, champName);
+            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, playerName, champName, direction);
         }
     } 
 
