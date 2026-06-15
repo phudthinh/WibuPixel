@@ -488,6 +488,12 @@ public class Menu : MonoBehaviourPunCallbacks
         roomList.Clear();
     }
 
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        Debug.LogWarning($"Disconnected from Photon: {cause}. Returning to Loading scene.");
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Loading");
+    }
+
     private void OnDestroy()
     {
         PhotonNetwork.RemoveCallbackTarget(this);

@@ -9,6 +9,8 @@ public class Loadding : MonoBehaviourPunCallbacks
 {
     public void Start()
     {
+        Application.runInBackground = true;
+        PhotonNetwork.KeepAliveInBackground = 60f;
         PhotonNetwork.ConnectUsingSettings();
     }
     public override void OnConnectedToMaster()
