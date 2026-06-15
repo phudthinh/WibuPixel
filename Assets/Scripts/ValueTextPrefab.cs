@@ -16,6 +16,19 @@ public class ValueText : MonoBehaviourPunCallbacks
 
     private float timeDestroy = 2f, valueBlur = 1f, valueScale = 1f;
 
+    private TextMeshPro _textMeshPro;
+    private TextMeshPro TextMeshProComponent
+    {
+        get
+        {
+            if (_textMeshPro == null)
+            {
+                _textMeshPro = GetComponent<TextMeshPro>();
+            }
+            return _textMeshPro;
+        }
+    }
+
     [PunRPC]
     public void SetValueTextInfoRPC(string type, float value)
     {
@@ -26,7 +39,7 @@ public class ValueText : MonoBehaviourPunCallbacks
 
     private void UpdateText()
     {
-        this.GetComponent<TextMeshPro>().text = GetFormattedAttributeText(_value);
+        TextMeshProComponent.text = GetFormattedAttributeText(_value);
         ChangeColor();
     }
 
@@ -88,46 +101,47 @@ public class ValueText : MonoBehaviourPunCallbacks
 
     void ChangeColor()
     {
+        var tmp = TextMeshProComponent;
         if(_type == "Damage")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(255, 100, 0, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 3.0f;
+            tmp.color = new Color32(255, 100, 0, 255);
+            tmp.fontSize = 3.0f;
         }
         else if(_type == "CriticalDamage")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(255, 0, 0, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 4.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(255, 0, 0, 255);
+            tmp.fontSize = 4.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
         else if(_type == "Healing")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(114, 187, 78, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 5.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(114, 187, 78, 255);
+            tmp.fontSize = 5.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
         else if(_type == "MiniHealing")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(114, 187, 78, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 3.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(114, 187, 78, 255);
+            tmp.fontSize = 3.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
         else if(_type == "Mana")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(33, 157, 242, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 5.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(33, 157, 242, 255);
+            tmp.fontSize = 5.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
         else if(_type == "MiniMana")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(33, 157, 242, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 3.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(33, 157, 242, 255);
+            tmp.fontSize = 3.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
         else if(_type == "Bloodsucking")
         {
-            this.GetComponent<TextMeshPro>().color = new Color32(255, 0, 0, 255);
-            this.GetComponent<TextMeshPro>().fontSize = 3.0f;
-            this.GetComponent<TextMeshPro>().fontStyle = FontStyles.Bold;
+            tmp.color = new Color32(255, 0, 0, 255);
+            tmp.fontSize = 3.0f;
+            tmp.fontStyle = FontStyles.Bold;
         }
     }
 

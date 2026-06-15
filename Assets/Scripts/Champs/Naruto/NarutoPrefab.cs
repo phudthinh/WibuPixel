@@ -189,6 +189,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     }
 
     private State currentState = State.Stand;
+    private readonly Dictionary<string, AnimationClip> _animationClips = new Dictionary<string, AnimationClip>();
 
     private void Start()
     {
@@ -201,6 +202,14 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         StartProperties();
         _chatInput = GameObject.Find("ChatInput").GetComponent<TMP_InputField>();
         
+        if (_animator != null && _animator.runtimeAnimatorController != null)
+        {
+            foreach (var c in _animator.runtimeAnimatorController.animationClips)
+            {
+                _animationClips[c.name] = c;
+            }
+        }
+
         StartCoroutine(AddContentSkill());
         StartCoroutine(TimeCooldownSkill());
         StartCoroutine(Healing());
@@ -589,7 +598,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
             }
             if(_isGrounded)
             {
-                clip = _animator.runtimeAnimatorController.animationClips.ToList().Find(x => x.name == "Attack0" + _attackCount.ToString() + "Ground");
+                _animationClips.TryGetValue("Attack0" + _attackCount.ToString() + "Ground", out clip);
                 if(_attackCount == 1)
                 {
                     randomVoice = Random.Range(1, 3);
@@ -641,7 +650,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
             }
             else
             {
-                clip = _animator.runtimeAnimatorController.animationClips.ToList().Find(x => x.name == "Attack0" + _attackCount.ToString() + "Sky");
+                _animationClips.TryGetValue("Attack0" + _attackCount.ToString() + "Sky", out clip);
                 if(_attackCount == 1)
                 {
                     randomVoice = Random.Range(1, 3);
