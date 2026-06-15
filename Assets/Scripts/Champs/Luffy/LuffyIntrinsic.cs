@@ -27,7 +27,7 @@ public class LuffyIntrinsic : MonoBehaviourPunCallbacks
     void Awake()
     {
         _game = GameObject.Find("GameScript").GetComponent<Game>();
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
     }
     void Update()
     {

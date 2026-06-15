@@ -193,7 +193,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
         _rb = GetComponent<Rigidbody2D>();
         _game = GameObject.Find("GameScript").GetComponent<Game>();
         _photonView.RPC("SetPlayerInfo", RpcTarget.All);
@@ -235,7 +235,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
             UpdateProperties();
             _endGame = _game.GetEndGame();
         }
-        if(PhotonNetwork.LocalPlayer.Equals(_photonView.Owner))
+        if(photonView.IsMine)
         {
             _photonView.RPC("SyncPlayerPosition", RpcTarget.All, transform.position);
             _photonView.RPC("SetState", RpcTarget.All, (int)currentState);
@@ -245,7 +245,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     }
     private void StartProperties()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             _damage = PlayerPrefs.GetFloat("Damage");
             _defense = PlayerPrefs.GetFloat("Defense");
@@ -286,12 +286,48 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
             StartCoroutine(TimeUnSetIntrinsic(1.0f));
             if(this.gameObject.tag == "Player01")
             {
-                _game.TakePlusDamPlayer01(2);
+                float value_health = _game.GetHealthMaxPlayer01() * 1 / 100;
+                float value_mana = _game.GetManaMaxPlayer01() * 1 / 100;
+                _game.TakePlusHealthPlayer01(value_health);
+                _game.TakePlusManaPlayer01(value_mana);
+                if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
+                {
+                    float randomPositionX = Random.Range(this.transform.position.x - 0.3f, this.transform.position.x + 0.3f);
+                    float randomPositionY = Random.Range(this.transform.position.y - 0.5f, this.transform.position.y + 0.5f);
+                    GameObject _valueTextPrefab = PhotonNetwork.Instantiate("ValueTextPrefab", new Vector2(randomPositionX, randomPositionY), Quaternion.identity);
+                    _valueTextPrefab.GetComponent<PhotonView>().RPC("SetValueTextInfoRPC", RpcTarget.All, "MiniHealing", value_health);
+                }
+
+                if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
+                {
+                    float randomPositionX = Random.Range(this.transform.position.x - 0.3f, this.transform.position.x + 0.3f);
+                    float randomPositionY = Random.Range(this.transform.position.y - 0.5f, this.transform.position.y + 0.5f);
+                    GameObject _valueTextPrefab = PhotonNetwork.Instantiate("ValueTextPrefab", new Vector2(randomPositionX, randomPositionY), Quaternion.identity);
+                    _valueTextPrefab.GetComponent<PhotonView>().RPC("SetValueTextInfoRPC", RpcTarget.All, "MiniMana", value_mana);
+                }
                 _timeCooldownIntrinsic = PlayerPrefs.GetFloat("CooldownIntrinsic") - (PlayerPrefs.GetFloat("CooldownIntrinsic") * _game.GetReducedTimePlayer01() / 100);
             }
             else if(this.gameObject.tag == "Player02")
             {
-                _game.TakePlusDamPlayer02(2);
+                float value_health = _game.GetHealthMaxPlayer02() * 1 / 100;
+                float value_mana = _game.GetManaMaxPlayer02() * 1 / 100;
+                _game.TakePlusHealthPlayer02(value_health);
+                _game.TakePlusManaPlayer02(value_mana);
+                if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
+                {
+                    float randomPositionX = Random.Range(this.transform.position.x - 0.3f, this.transform.position.x + 0.3f);
+                    float randomPositionY = Random.Range(this.transform.position.y - 0.5f, this.transform.position.y + 0.5f);
+                    GameObject _valueTextPrefab = PhotonNetwork.Instantiate("ValueTextPrefab", new Vector2(randomPositionX, randomPositionY), Quaternion.identity);
+                    _valueTextPrefab.GetComponent<PhotonView>().RPC("SetValueTextInfoRPC", RpcTarget.All, "MiniHealing", value_health);
+                }
+
+                if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
+                {
+                    float randomPositionX = Random.Range(this.transform.position.x - 0.3f, this.transform.position.x + 0.3f);
+                    float randomPositionY = Random.Range(this.transform.position.y - 0.5f, this.transform.position.y + 0.5f);
+                    GameObject _valueTextPrefab = PhotonNetwork.Instantiate("ValueTextPrefab", new Vector2(randomPositionX, randomPositionY), Quaternion.identity);
+                    _valueTextPrefab.GetComponent<PhotonView>().RPC("SetValueTextInfoRPC", RpcTarget.All, "MiniMana", value_mana);
+                }
                 _timeCooldownIntrinsic = PlayerPrefs.GetFloat("CooldownIntrinsic") - (PlayerPrefs.GetFloat("CooldownIntrinsic") * _game.GetReducedTimePlayer02() / 100);
             }
         }
@@ -372,7 +408,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     private IEnumerator StartPlayer()
     {
         yield return new WaitForSeconds(4.0f);
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             canControl = true;
         }
@@ -976,8 +1012,8 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     IEnumerator TimeUnSkill02(float time)
     {
         yield return new WaitForSeconds(time);
-        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text, -1);
-        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 10.0f, _playerNameText.text, _champNameText.text, 1);
+        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 8.0f, _playerNameText.text, _champNameText.text, -1);
+        _photonView.RPC("ShowNarutoClone", RpcTarget.All, new Vector2(transform.position.x, transform.position.y), 8.0f, _playerNameText.text, _champNameText.text, 1);
         _skill02 = false;
     }
     private void Skill03()
@@ -1176,13 +1212,6 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         _UISkill04Frame = GameObject.Find("UISkill04Frame");
         _UISpellFrame = GameObject.Find("UISpellFrame");
 
-        _UIIntrinsicFrame.SetActive(false);
-        _UISkill01Frame.SetActive(false);
-        _UISkill02Frame.SetActive(false);
-        _UISkill03Frame.SetActive(false);
-        _UISkill04Frame.SetActive(false);
-        _UISpellFrame.SetActive(false);
-
         _textShowTimeCooldownIntrinsic = GameObject.Find("TextShowTimeCooldownIntrinsic").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill01 = GameObject.Find("TextShowTimeCooldownSkill01").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill02 = GameObject.Find("TextShowTimeCooldownSkill02").GetComponent<TextMeshProUGUI>();
@@ -1197,6 +1226,20 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSkill04 = GameObject.Find("ObjectTimeCooldownSkill04");
         _objectTimeCooldownSpell = GameObject.Find("ObjectTimeCooldownSpell");
 
+        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
+        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
+        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
+        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
+        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
+        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
+
+        _UIIntrinsicFrame.SetActive(false);
+        _UISkill01Frame.SetActive(false);
+        _UISkill02Frame.SetActive(false);
+        _UISkill03Frame.SetActive(false);
+        _UISkill04Frame.SetActive(false);
+        _UISpellFrame.SetActive(false);
+
         _objectTimeCooldownIntrinsic.SetActive(false);
         _objectTimeCooldownSkill01.SetActive(false);
         _objectTimeCooldownSkill02.SetActive(false);
@@ -1205,13 +1248,6 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSpell.SetActive(false);
 
         _currentSpell = PlayerPrefs.GetString("Spell");
-
-        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
-        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
-        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
-        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
-        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
-        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
 
         _textTitleIntrinsic.text = PlayerPrefs.GetString("TitleIntrinsic");
         _textTitleSkill01.text = PlayerPrefs.GetString("TitleSkill01");
@@ -1282,7 +1318,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
     }
     IEnumerator Healing()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             while (!_endGame)
             {
@@ -1292,7 +1328,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
                 if(this.gameObject.tag == "Player01")
                 {
                     float _plusHealth = _game.GetHealingPlayer01();
-                    float _plusMana = _game.GetRestoreManaPlayer01();
+                    float _plusMana = _game.GetRestoreManaPlayer01() + 5f;
                     _game.TakePlusHealthPlayer01(_plusHealth);
                     _game.TakePlusManaPlayer01(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer01() * 5 / 100)
@@ -1310,7 +1346,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
                 else if(this.gameObject.tag == "Player02")
                 {
                     float _plusHealth = _game.GetHealingPlayer02();
-                    float _plusMana = _game.GetRestoreManaPlayer02();
+                    float _plusMana = _game.GetRestoreManaPlayer02() + 5f;
                     _game.TakePlusHealthPlayer02(_plusHealth);
                     _game.TakePlusManaPlayer02(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer02() * 5 / 100)
@@ -1370,7 +1406,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         Attack attackComponent = _attack.GetComponent<Attack>();
         if (attackComponent != null)
         {
-            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, photonView.IsMine);
         }
     }
 
@@ -1390,7 +1426,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         NarutoPowerSkill01 powerSkill01Component = _powerSkill01.GetComponent<NarutoPowerSkill01>();
         if (powerSkill01Component != null)
         {
-            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner), numKunai);
+            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, photonView.IsMine, numKunai);
         }
     }
     
@@ -1414,7 +1450,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         NarutoPowerSkill04 powerSkill04Component = _powerSkill04.GetComponent<NarutoPowerSkill04>();
         if (powerSkill04Component != null)
         {
-            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, photonView.IsMine);
         }
     }
 
@@ -1521,7 +1557,7 @@ public class NarutoPrefab : MonoBehaviourPunCallbacks
         NarutoPowerSkill03 powerSkill03Component = _skill03Prefab.GetComponent<NarutoPowerSkill03>();
         if (powerSkill03Component != null)
         {
-            powerSkill03Component.SetAttackInfo(this.gameObject.tag, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill03Component.SetAttackInfo(this.gameObject.tag, photonView.IsMine);
         }
     }
 

@@ -61,7 +61,7 @@ public class ValueText : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
     }
 
     void Update()

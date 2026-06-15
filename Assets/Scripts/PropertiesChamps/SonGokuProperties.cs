@@ -119,7 +119,7 @@ public class SonGokuProperties : MonoBehaviour
             _titleSkill03 = "Dịch chuyển tức thời";
             _titleSkill04 = "Kamehameha";
 
-            _descriptionIntrinsic = "Goku hồi 3% máu mỗi giây và hồi 3% mana mỗi 5 giây.";
+            _descriptionIntrinsic = "Goku hồi 1% máu và 1% mana mỗi 2 giây.";
             _descriptionSkill01 = "Goku phóng một quả cầu năng lượng, gây " + _damSkill01 + " sát thương.";
             _descriptionSkill02 = "Goku tạo ra một quả cầu năng lượng lớn và phóng đi, gây " + _damSkill02 + " sát thương. Kỹ năng chỉ có thể sử dụng dưới mặt đất";
             _descriptionSkill03 = "Goku di chuyển đến vị trí phía trước.";

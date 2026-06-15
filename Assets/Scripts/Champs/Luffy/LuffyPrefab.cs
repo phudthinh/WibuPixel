@@ -197,7 +197,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
         _rb = GetComponent<Rigidbody2D>();
         _game = GameObject.Find("GameScript").GetComponent<Game>();
         _photonView.RPC("SetPlayerInfo", RpcTarget.All);
@@ -239,7 +239,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
             UpdateProperties();
             _endGame = _game.GetEndGame();
         }
-        if(PhotonNetwork.LocalPlayer.Equals(_photonView.Owner))
+        if(_photonView.IsMine)
         {
             _photonView.RPC("SyncPlayerPosition", RpcTarget.All, transform.position);
             _photonView.RPC("SetState", RpcTarget.All, (int)currentState);
@@ -249,7 +249,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
     }
     private void StartProperties()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             _damage = PlayerPrefs.GetFloat("Damage");
             _defense = PlayerPrefs.GetFloat("Defense");
@@ -365,7 +365,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
     private IEnumerator StartPlayer()
     {
         yield return new WaitForSeconds(4.0f);
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             canControl = true;
         }
@@ -1240,13 +1240,6 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         _UISkill04Frame = GameObject.Find("UISkill04Frame");
         _UISpellFrame = GameObject.Find("UISpellFrame");
 
-        _UIIntrinsicFrame.SetActive(false);
-        _UISkill01Frame.SetActive(false);
-        _UISkill02Frame.SetActive(false);
-        _UISkill03Frame.SetActive(false);
-        _UISkill04Frame.SetActive(false);
-        _UISpellFrame.SetActive(false);
-
         _textShowTimeCooldownIntrinsic = GameObject.Find("TextShowTimeCooldownIntrinsic").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill01 = GameObject.Find("TextShowTimeCooldownSkill01").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill02 = GameObject.Find("TextShowTimeCooldownSkill02").GetComponent<TextMeshProUGUI>();
@@ -1261,6 +1254,20 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSkill04 = GameObject.Find("ObjectTimeCooldownSkill04");
         _objectTimeCooldownSpell = GameObject.Find("ObjectTimeCooldownSpell");
 
+        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
+        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
+        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
+        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
+        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
+        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
+
+        _UIIntrinsicFrame.SetActive(false);
+        _UISkill01Frame.SetActive(false);
+        _UISkill02Frame.SetActive(false);
+        _UISkill03Frame.SetActive(false);
+        _UISkill04Frame.SetActive(false);
+        _UISpellFrame.SetActive(false);
+
         _objectTimeCooldownIntrinsic.SetActive(false);
         _objectTimeCooldownSkill01.SetActive(false);
         _objectTimeCooldownSkill02.SetActive(false);
@@ -1269,13 +1276,6 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSpell.SetActive(false);
 
         _currentSpell = PlayerPrefs.GetString("Spell");
-
-        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
-        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
-        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
-        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
-        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
-        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
 
         _textTitleIntrinsic.text = PlayerPrefs.GetString("TitleIntrinsic");
         _textTitleSkill01.text = PlayerPrefs.GetString("TitleSkill01");
@@ -1346,7 +1346,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
     }
     IEnumerator Healing()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             while (!_endGame)
             {
@@ -1356,7 +1356,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
                 if(this.gameObject.tag == "Player01")
                 {
                     float _plusHealth = _game.GetHealingPlayer01();
-                    float _plusMana = _game.GetRestoreManaPlayer01();
+                    float _plusMana = _game.GetRestoreManaPlayer01() + 5f;
                     _game.TakePlusHealthPlayer01(_plusHealth);
                     _game.TakePlusManaPlayer01(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer01() * 5 / 100)
@@ -1374,7 +1374,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
                 else if(this.gameObject.tag == "Player02")
                 {
                     float _plusHealth = _game.GetHealingPlayer02();
-                    float _plusMana = _game.GetRestoreManaPlayer02();
+                    float _plusMana = _game.GetRestoreManaPlayer02() + 5f;
                     _game.TakePlusHealthPlayer02(_plusHealth);
                     _game.TakePlusManaPlayer02(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer02() * 5 / 100)
@@ -1434,7 +1434,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         Attack attackComponent = _attack.GetComponent<Attack>();
         if (attackComponent != null)
         {
-            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
 
@@ -1447,7 +1447,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         LuffyIntrinsic intrinsicComponent = _intrinsic.GetComponent<LuffyIntrinsic>();
         if (intrinsicComponent != null)
         {
-            intrinsicComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            intrinsicComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
 
@@ -1461,7 +1461,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         LuffySkill01 powerSkill01Component = _powerSkill01.GetComponent<LuffySkill01>();
         if (powerSkill01Component != null)
         {
-            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1473,7 +1473,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         LuffySkill02 powerSkill02Component = _powerSkill02.GetComponent<LuffySkill02>();
         if (powerSkill02Component != null)
         {
-            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1485,7 +1485,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         LuffySkill03 powerSkill03Component = _powerSkill03.GetComponent<LuffySkill03>();
         if (powerSkill03Component != null)
         {
-            powerSkill03Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill03Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1497,7 +1497,7 @@ public class LuffyPrefab : MonoBehaviourPunCallbacks
         LuffySkill04 powerSkill04Component = _powerSkill04.GetComponent<LuffySkill04>();
         if (powerSkill04Component != null)
         {
-            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]

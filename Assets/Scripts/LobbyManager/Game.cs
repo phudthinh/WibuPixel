@@ -231,7 +231,7 @@ public class Game : MonoBehaviourPunCallbacks
 
     void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
         localPlayer = Game.Instance.GetLocalPlayer();
 
         _chatInput.onEndEdit.AddListener(OnChatInputEndEdit);
@@ -304,6 +304,8 @@ public class Game : MonoBehaviourPunCallbacks
         _timeText = GameObject.Find("TimeText").GetComponent<TextMeshProUGUI>();
 
         StartCoroutine(SetMaxBar());
+        StartCoroutine(DelayedCameraFollow());
+        StartCoroutine(MaxHhealthManaPlayer());
         if(PlayerPrefs.GetString("Scene") == "ComputerLobby")
         {
             _dummy.SetActive(true);
@@ -314,10 +316,8 @@ public class Game : MonoBehaviourPunCallbacks
     void Update()
     {
         CameraStartZoom();
-        StartCoroutine(DelayedCameraFollow());
         ParallaxBackground();
         UpdateHitTimeWait();
-        StartCoroutine(MaxHhealthManaPlayer());
         HiddenDamage();
         _voiceSound = GameObject.FindGameObjectsWithTag("VoiceSound").Select(go => go.GetComponent<AudioSource>()).ToArray();
         _effectSound = GameObject.FindGameObjectsWithTag("EffectSound").Select(go => go.GetComponent<AudioSource>()).ToArray();
@@ -337,63 +337,66 @@ public class Game : MonoBehaviourPunCallbacks
     IEnumerator MaxHhealthManaPlayer()
     {
         yield return new WaitForSeconds(5.0f);
-
-        if(_healthPlayer01 >= _healthMaxPlayer01)
+        while (!_endGame)
         {
-            _healthPlayer01 = _healthMaxPlayer01;
-        }
-        if(_healthPlayer02 >= _healthMaxPlayer02)
-        {
-            _healthPlayer02 = _healthMaxPlayer02;
-        }
-        if(_healthPlayer01 <= 0)
-        {
-            _healthPlayer01 = 0;
-            if(PlayerPrefs.GetString("Scene") != "ComputerLobby")
+            if(_healthPlayer01 >= _healthMaxPlayer01)
             {
-                _endGame = true;
-                if (playerInRoom == 0)
+                _healthPlayer01 = _healthMaxPlayer01;
+            }
+            if(_healthPlayer02 >= _healthMaxPlayer02)
+            {
+                _healthPlayer02 = _healthMaxPlayer02;
+            }
+            if(_healthPlayer01 <= 0)
+            {
+                _healthPlayer01 = 0;
+                if(PlayerPrefs.GetString("Scene") != "ComputerLobby")
                 {
-                    _UILose.SetActive(true);
-                }
-                if (playerInRoom == 1)
-                {
-                    _UIWin.SetActive(true);
+                    _endGame = true;
+                    if (playerInRoom == 0)
+                    {
+                        _UILose.SetActive(true);
+                    }
+                    if (playerInRoom == 1)
+                    {
+                        _UIWin.SetActive(true);
+                    }
                 }
             }
-        }
-        if(_healthPlayer02 <= 0)
-        {
-            _healthPlayer02 = 0;
-            if(PlayerPrefs.GetString("Scene") != "ComputerLobby")
+            if(_healthPlayer02 <= 0)
             {
-                _endGame = true;
-                if (playerInRoom == 0)
+                _healthPlayer02 = 0;
+                if(PlayerPrefs.GetString("Scene") != "ComputerLobby")
                 {
-                    _UIWin.SetActive(true);
-                }
-                if (playerInRoom == 1)
-                {
-                    _UILose.SetActive(true);
+                    _endGame = true;
+                    if (playerInRoom == 0)
+                    {
+                        _UIWin.SetActive(true);
+                    }
+                    if (playerInRoom == 1)
+                    {
+                        _UILose.SetActive(true);
+                    }
                 }
             }
-        }
 
-        if(_manaPlayer01 >= _manaMaxPlayer01)
-        {
-            _manaPlayer01 = _manaMaxPlayer01;
-        }
-        if(_manaPlayer02 >= _manaMaxPlayer02)
-        {
-            _manaPlayer02 = _manaMaxPlayer02;
-        }
-        if(_manaPlayer01 <= 0 && !_endGame)
-        {
-            _manaPlayer01 = 0;
-        }
-        if(_manaPlayer02 <= 0 && !_endGame)
-        {
-            _manaPlayer02 = 0;
+            if(_manaPlayer01 >= _manaMaxPlayer01)
+            {
+                _manaPlayer01 = _manaMaxPlayer01;
+            }
+            if(_manaPlayer02 >= _manaMaxPlayer02)
+            {
+                _manaPlayer02 = _manaMaxPlayer02;
+            }
+            if(_manaPlayer01 <= 0 && !_endGame)
+            {
+                _manaPlayer01 = 0;
+            }
+            if(_manaPlayer02 <= 0 && !_endGame)
+            {
+                _manaPlayer02 = 0;
+            }
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
@@ -577,56 +580,189 @@ public class Game : MonoBehaviourPunCallbacks
     {
         if (!canZoomCamera)
             return;
-        
-        if(Camera.main.orthographicSize >= 5.0f)
+
+        if (localPlayer != null)
         {
-            Camera.main.orthographicSize -= 1.0f * Time.deltaTime;
-            if (playerInRoom == 0)
+            GameObject opponent = GetOpponentPlayer();
+            if (opponent != null)
             {
-                if(cameraPosition.transform.position.x > minX)
-                    cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x - (2.0f * Time.deltaTime), cameraPosition.transform.position.y, cameraPosition.transform.position.z);
+                // Calculate target midpoint and zoom size based on distance
+                Vector3 midpoint = (localPlayer.transform.position + opponent.transform.position) / 2f;
+                float distance = Vector2.Distance(localPlayer.transform.position, opponent.transform.position);
+                float targetSize = 5.0f;
+                if (distance > 4f)
+                {
+                    targetSize = 5.0f + (distance - 4f) * 0.3f;
+                }
+                targetSize = Mathf.Clamp(targetSize, 5.0f, 8.0f);
+
+                // Lerp zoom and position towards midpoint
+                Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, targetSize, 1.0f * Time.deltaTime);
+                
+                // Clamp target position
+                float sizeDiff = Camera.main.orthographicSize - 5.0f;
+                float aspect = Camera.main.aspect;
+                float adjMaxX = maxX - sizeDiff * aspect;
+                float adjMinX = minX + sizeDiff * aspect;
+                float adjMaxY = maxY - sizeDiff;
+                float adjMinY = minY + sizeDiff;
+
+                if (adjMinX > adjMaxX)
+                {
+                    float center = (maxX + minX) / 2f;
+                    adjMinX = center;
+                    adjMaxX = center;
+                }
+                if (adjMinY > adjMaxY)
+                {
+                    float center = (maxY + minY) / 2f;
+                    adjMinY = center;
+                    adjMaxY = center;
+                }
+
+                float clampedX = Mathf.Clamp(midpoint.x, adjMinX, adjMaxX);
+                float clampedY = Mathf.Clamp(midpoint.y, adjMinY, adjMaxY);
+                Vector3 targetPos = new Vector3(clampedX, clampedY, Camera.main.transform.position.z);
+                
+                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPos, 2.0f * Time.deltaTime);
+
+                // Check if we reached the target zoom size and position
+                if (Mathf.Abs(Camera.main.orthographicSize - targetSize) < 0.05f && Vector3.Distance(Camera.main.transform.position, targetPos) < 0.1f)
+                {
+                    canZoomCamera = false;
+                    Camera.main.orthographicSize = targetSize;
+                    Camera.main.transform.position = targetPos;
+                }
             }
-            if (playerInRoom == 1)
+            else
             {
-                if(cameraPosition.transform.position.x < maxX)
-                    cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x + (2.0f * Time.deltaTime), cameraPosition.transform.position.y, cameraPosition.transform.position.z);
+                // Fallback if no opponent is present
+                Camera.main.orthographicSize = Mathf.MoveTowards(Camera.main.orthographicSize, 5.0f, 1.0f * Time.deltaTime);
+                Vector3 targetPos = new Vector3(localPlayer.transform.position.x, localPlayer.transform.position.y, Camera.main.transform.position.z);
+                
+                // Clamp targetPos
+                float clampedX = Mathf.Clamp(targetPos.x, minX, maxX);
+                float clampedY = Mathf.Clamp(targetPos.y, minY, maxY);
+                Vector3 finalTargetPos = new Vector3(clampedX, clampedY, Camera.main.transform.position.z);
+                
+                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, finalTargetPos, 2.0f * Time.deltaTime);
+
+                if (Mathf.Abs(Camera.main.orthographicSize - 5.0f) < 0.05f && Vector3.Distance(Camera.main.transform.position, finalTargetPos) < 0.1f)
+                {
+                    canZoomCamera = false;
+                    Camera.main.orthographicSize = 5.0f;
+                    Camera.main.transform.position = finalTargetPos;
+                }
             }
-            if(cameraPosition.transform.position.y > minY)
-                cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x, cameraPosition.transform.position.y  - (1.0f * Time.deltaTime), cameraPosition.transform.position.z);
-        }
-        else
-        {
-            canZoomCamera = false;
-            Camera.main.orthographicSize = 5.0f;
-            return;
         }
     }
 
     private IEnumerator DelayedCameraFollow()
     {
         yield return new WaitForSeconds(4.0f);
-        if (localPlayer != null)
+        while (true)
         {
-            Vector3 targetPosition = new Vector3(localPlayer.transform.position.x, localPlayer.transform.position.y, Camera.main.transform.position.z);
-            Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPosition, 3.0f * Time.deltaTime);
-        }
-        if (cameraPosition.transform.position.x > maxX)
-        {
-            cameraPosition.transform.position = new Vector3(maxX, cameraPosition.transform.position.y, cameraPosition.transform.position.z);
-        }
-        if (cameraPosition.transform.position.x < minX)
-        {
-            cameraPosition.transform.position = new Vector3(minX, cameraPosition.transform.position.y, cameraPosition.transform.position.z);
-        }
+            if (localPlayer != null)
+            {
+                Vector3 targetPosition;
+                GameObject opponent = GetOpponentPlayer();
+                if (opponent != null)
+                {
+                    Vector3 midpoint = (localPlayer.transform.position + opponent.transform.position) / 2f;
+                    targetPosition = new Vector3(midpoint.x, midpoint.y, Camera.main.transform.position.z);
 
-        if (cameraPosition.transform.position.y > maxY)
-        {
-            cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x, maxY, cameraPosition.transform.position.z);
+                    // Smoothly adjust zoom based on player distance if initial zoom is done
+                    if (!canZoomCamera)
+                    {
+                        float distance = Vector2.Distance(localPlayer.transform.position, opponent.transform.position);
+                        float targetSize = 5.0f;
+                        if (distance > 4f)
+                        {
+                            targetSize = 5.0f + (distance - 4f) * 0.3f;
+                        }
+                        targetSize = Mathf.Clamp(targetSize, 5.0f, 8.0f);
+                        Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, targetSize, 2.0f * Time.deltaTime);
+                    }
+                }
+                else
+                {
+                    targetPosition = new Vector3(localPlayer.transform.position.x, localPlayer.transform.position.y, Camera.main.transform.position.z);
+                    if (!canZoomCamera)
+                    {
+                        Camera.main.orthographicSize = Mathf.Lerp(Camera.main.orthographicSize, 5.0f, 2.0f * Time.deltaTime);
+                    }
+                }
+
+                Camera.main.transform.position = Vector3.Lerp(Camera.main.transform.position, targetPosition, 3.0f * Time.deltaTime);
+            }
+
+            // Adjust clamp boundaries based on the current camera orthographicSize to prevent showing out of bounds area
+            float sizeDiff = Camera.main.orthographicSize - 5.0f;
+            float aspect = Camera.main.aspect;
+            float adjMaxX = maxX - sizeDiff * aspect;
+            float adjMinX = minX + sizeDiff * aspect;
+            float adjMaxY = maxY - sizeDiff;
+            float adjMinY = minY + sizeDiff;
+
+            if (adjMinX > adjMaxX)
+            {
+                float center = (maxX + minX) / 2f;
+                adjMinX = center;
+                adjMaxX = center;
+            }
+            if (adjMinY > adjMaxY)
+            {
+                float center = (maxY + minY) / 2f;
+                adjMinY = center;
+                adjMaxY = center;
+            }
+
+            if (cameraPosition.transform.position.x > adjMaxX)
+            {
+                cameraPosition.transform.position = new Vector3(adjMaxX, cameraPosition.transform.position.y, cameraPosition.transform.position.z);
+            }
+            if (cameraPosition.transform.position.x < adjMinX)
+            {
+                cameraPosition.transform.position = new Vector3(adjMinX, cameraPosition.transform.position.y, cameraPosition.transform.position.z);
+            }
+
+            if (cameraPosition.transform.position.y > adjMaxY)
+            {
+                cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x, adjMaxY, cameraPosition.transform.position.z);
+            }
+            if (cameraPosition.transform.position.y < adjMinY)
+            {
+                cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x, adjMinY, cameraPosition.transform.position.z);
+            }
+
+            yield return null;
         }
-        if (cameraPosition.transform.position.y < minY)
+    }
+
+
+
+    private GameObject GetOpponentPlayer()
+    {
+        if (PlayerPrefs.GetString("Scene") == "ComputerLobby")
         {
-            cameraPosition.transform.position = new Vector3(cameraPosition.transform.position.x, minY, cameraPosition.transform.position.z);
+            return _dummy;
         }
+        else
+        {
+            if (localPlayer != null)
+            {
+                string opponentTag = localPlayer.CompareTag("Player01") ? "Player02" : "Player01";
+                GameObject[] opponents = GameObject.FindGameObjectsWithTag(opponentTag);
+                foreach (GameObject opponent in opponents)
+                {
+                    if (opponent.GetComponent<NarutoClone>() == null)
+                    {
+                        return opponent;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private void SetNameChamp()
@@ -903,20 +1039,6 @@ public class Game : MonoBehaviourPunCallbacks
         float displayedHealth = _healthPlayer01;
         float displayedMaxHealth = _healthMaxPlayer01;
 
-        if (localPlayer != null && localPlayer.tag == "Player01" && activeClonesPlayer01.Count > 0)
-        {
-            var firstClone = activeClonesPlayer01[0];
-            if (firstClone != null)
-            {
-                displayedHealth = firstClone.GetHealth();
-                displayedMaxHealth = 50f;
-            }
-        }
-        else if (localPlayer != null && localPlayer.tag == "Player02")
-        {
-            displayedHealth = Mathf.Max(0f, _healthPlayer01 - fakeDamagePlayer01);
-        }
-
         _healthMaxPlayer01Text.text = displayedMaxHealth.ToString("###,###");
         _healthPlayer01Text.text = displayedHealth.ToString("###,###");
         _healingPlayer01Text.text = GetFormattedAttributeText("Hồi máu", _healingPlayer01) + "/s";
@@ -955,20 +1077,6 @@ public class Game : MonoBehaviourPunCallbacks
         
         float displayedHealth = _healthPlayer02;
         float displayedMaxHealth = _healthMaxPlayer02;
-
-        if (localPlayer != null && localPlayer.tag == "Player02" && activeClonesPlayer02.Count > 0)
-        {
-            var firstClone = activeClonesPlayer02[0];
-            if (firstClone != null)
-            {
-                displayedHealth = firstClone.GetHealth();
-                displayedMaxHealth = 50f;
-            }
-        }
-        else if (localPlayer != null && localPlayer.tag == "Player01")
-        {
-            displayedHealth = Mathf.Max(0f, _healthPlayer02 - fakeDamagePlayer02);
-        }
 
         _healthMaxPlayer02Text.text = displayedMaxHealth.ToString("###,###");
         _healthPlayer02Text.text =  displayedHealth.ToString("###,###");
@@ -1284,12 +1392,20 @@ public class Game : MonoBehaviourPunCallbacks
     public void SetPlusHealthPlayer01(float health)
     {
         _healthPlayer01 += health;
+        if (_healthPlayer01 > _healthMaxPlayer01)
+        {
+            _healthPlayer01 = _healthMaxPlayer01;
+        }
     }
 
     [PunRPC]
     public void SetPlusHealthPlayer02(float health)
     {
         _healthPlayer02 += health;
+        if (_healthPlayer02 > _healthMaxPlayer02)
+        {
+            _healthPlayer02 = _healthMaxPlayer02;
+        }
     }
 
     public void TakePlusHealthPlayer01(float health)
@@ -1306,12 +1422,20 @@ public class Game : MonoBehaviourPunCallbacks
     public void SetPlusManaPlayer01(float mana)
     {
         _manaPlayer01 += mana;
+        if (_manaPlayer01 > _manaMaxPlayer01)
+        {
+            _manaPlayer01 = _manaMaxPlayer01;
+        }
     }
 
     [PunRPC]
     public void SetPlusManaPlayer02(float mana)
     {
         _manaPlayer02 += mana;
+        if (_manaPlayer02 > _manaMaxPlayer02)
+        {
+            _manaPlayer02 = _manaMaxPlayer02;
+        }
     }
 
     public void TakePlusManaPlayer01(float mana)

@@ -121,9 +121,9 @@ public class NarutoProperties : MonoBehaviour
             _titleSkill03 = "Rasengan";
             _titleSkill04 = "Rasenshuriken";
 
-            _descriptionIntrinsic = "Naruto tăng 2 sát thương mỗi " + _cooldownIntrinsic + " giây.";
+            _descriptionIntrinsic = "Naruto hồi 1% máu và 1% mana.";
             _descriptionSkill01 = "Naruto ném 1 kunai, gây " + _damSkill01 + " sát thương. Khi ở trên không sẽ ném 3 kunai.";
-            _descriptionSkill02 = "Naruto tạo ra 2 ảnh phân thân đánh lừa đối thủ. Mỗi ảnh phân ra chạy 1 hướng ngẫu nhiên và phân thân tồn tại trong 10 giây.";
+            _descriptionSkill02 = "Naruto tạo ra 2 ảnh phân thân đánh lừa đối thủ. Mỗi ảnh phân ra chạy 1 hướng ngẫu nhiên và phân thân tồn tại trong 8 giây.";
             _descriptionSkill03 = "Naruto tạo ra 1 quả Rasengan, gây " + _damSkill03 + " sát thương.";
             _descriptionSkill04 = "Naruto tạo ra 1 quả Rasenshuriken, gây " + _damSkill04 + " sát thương.";
 

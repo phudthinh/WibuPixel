@@ -41,7 +41,7 @@ public class SoloLobby : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
 
         _idLobbyText.text = PhotonNetwork.CurrentRoom.Name;
 

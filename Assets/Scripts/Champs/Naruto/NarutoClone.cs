@@ -10,7 +10,7 @@ public class NarutoClone : MonoBehaviourPunCallbacks
 {
     private const string HiddenDamageKey = "HiddenDamage";
     private Game _game;
-    private PhotonView _photonView;
+
     private Rigidbody2D _rb;
     private string _ofPlayer;
     private float _timeHitbox;
@@ -26,44 +26,20 @@ public class NarutoClone : MonoBehaviourPunCallbacks
 
     private float _health = 50f;
     private bool _isGrounded = true;
+    private bool _isDestroying = false;
+    private System.Random _random;
+
+    // Public variable for IntrinsicSkill object
+    public GameObject IntrinsicSkill;
+
+    private NarutoPrefab _realNaruto;
 
     private enum State
     {
-        Stand = 0,
-        Idle = 1,
-        Run = 2,
-        Jump = 3,
-        JumpMove = 4,
-        Fall = 5,
-        Attack01Ground = 6,
-        Attack01Sky = 7,
-        Attack02Ground = 8,
-        Attack02Sky = 9,
-        Attack03Ground = 10,
-        Attack03Sky = 11,
-        Attack04Ground = 12,
-        Attack04Sky = 13,
-        Hit01 = 14,
-        Hit02 = 15,
-        Hit03 = 16,
-        Dash = 17,
-        Skill01Ground = 18,
-        Skill01Sky = 19,
-        Skill02 = 20,
-        Skill03 = 21,
-        Skill04 = 22,
-        Skill02Destroy = 23
+        Run = 0,
+        Skill02Destroy = 1
     }
     private State currentState = State.Run;
-
-    private enum AIState
-    {
-        Stand = 0,
-        Idle = 1,
-        Run = 2,
-        Jump = 3
-    }
-    private AIState _aiState = AIState.Run;
 
     public void SetAttackInfo(string ofPlayerValue, float timeHitboxValue, string playerName, string champName, int directionValue)
     {
@@ -72,6 +48,10 @@ public class NarutoClone : MonoBehaviourPunCallbacks
         _playerNameText.text = playerName;
         _champNameText.text = champName;
         _direction = directionValue;
+
+        // Initialize System.Random with a seed synchronized across all clients
+        int seed = (int)(transform.position.x * 100f) + (int)(transform.position.y * 100f) + _direction + (int)(_timeHitbox * 10f);
+        _random = new System.Random(seed);
     }
 
     public float GetHealth()
@@ -82,7 +62,6 @@ public class NarutoClone : MonoBehaviourPunCallbacks
     void Awake()
     {
         _game = GameObject.Find("GameScript").GetComponent<Game>();
-        _photonView = GetComponent<PhotonView>();
     }
 
     void Start()
@@ -103,8 +82,31 @@ public class NarutoClone : MonoBehaviourPunCallbacks
 
         _rb = GetComponent<Rigidbody2D>();
 
+        // Check if this clone belongs to the local player
+        bool isMyClone = false;
+        GameObject[] p1Objects = GameObject.FindGameObjectsWithTag("Player01");
+        foreach (var p1 in p1Objects)
+        {
+            PhotonView pv = p1.GetComponent<PhotonView>();
+            if (pv != null && pv.IsMine && _ofPlayer == "Player01")
+            {
+                isMyClone = true;
+                break;
+            }
+        }
+        GameObject[] p2Objects = GameObject.FindGameObjectsWithTag("Player02");
+        foreach (var p2 in p2Objects)
+        {
+            PhotonView pv = p2.GetComponent<PhotonView>();
+            if (pv != null && pv.IsMine && _ofPlayer == "Player02")
+            {
+                isMyClone = true;
+                break;
+            }
+        }
+
         // Set opacity to 50% only on the owner player's screen
-        if (_photonView.IsMine)
+        if (isMyClone)
         {
             foreach (var sr in GetComponentsInChildren<SpriteRenderer>())
             {
@@ -114,7 +116,7 @@ public class NarutoClone : MonoBehaviourPunCallbacks
             }
         }
 
-        // Start AI behavior loop
+        // Start synchronized AI direction loop
         StartCoroutine(CloneAILoop());
     }
 
@@ -122,72 +124,54 @@ public class NarutoClone : MonoBehaviourPunCallbacks
     {
         while (true)
         {
-            float waitTime = UnityEngine.Random.Range(1.0f, 2.5f);
+            if (_random == null)
+            {
+                yield return null;
+                continue;
+            }
+
+            // Random wait time between 2.0s and 5.0s
+            float waitTime = (float)(2.0 + _random.NextDouble() * 3.0);
             yield return new WaitForSeconds(waitTime);
 
-            if (PhotonNetwork.LocalPlayer.Equals(_photonView.Owner))
+            if (_isDestroying)
             {
-                int randVal = UnityEngine.Random.Range(0, 100);
-                if (randVal < 30)
-                {
-                    _aiState = AIState.Stand;
-                }
-                else if (randVal < 85)
-                {
-                    _aiState = AIState.Run;
-                    // 20% chance to flip direction
-                    if (UnityEngine.Random.Range(0, 100) < 20)
-                    {
-                        _direction = -_direction;
-                    }
-                }
-                else
-                {
-                    _aiState = AIState.Jump;
-                }
+                break;
+            }
+
+            // 50% chance to reverse direction
+            if (_random.Next(0, 100) < 50)
+            {
+                _direction = -_direction;
             }
         }
     }
 
     void Update()
     {
+        if (_isDestroying)
+        {
+            _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y);
+            return;
+        }
+
         if (_timeHitbox > 0)
         {
             _timeHitbox -= Time.deltaTime;
+            _rb.linearVelocity = new Vector2(_speedFly * _direction, _rb.linearVelocity.y);
+            currentState = State.Run;
         }
         else
         {
+            _isDestroying = true;
+            _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y);
             currentState = State.Skill02Destroy;
             StartCoroutine(DestroyThisRPC());
         }
 
-        if (PhotonNetwork.LocalPlayer.Equals(_photonView.Owner))
+        if (_animator != null)
         {
-            if (_aiState == AIState.Stand)
-            {
-                _rb.linearVelocity = new Vector2(0, _rb.linearVelocity.y);
-                currentState = State.Idle;
-            }
-            else if (_aiState == AIState.Run)
-            {
-                _rb.linearVelocity = new Vector2(_speedFly * _direction, _rb.linearVelocity.y);
-                currentState = State.Run;
-            }
-            else if (_aiState == AIState.Jump)
-            {
-                if (_isGrounded)
-                {
-                    _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, 7f);
-                    _isGrounded = false;
-                }
-                _rb.linearVelocity = new Vector2(_speedFly * _direction, _rb.linearVelocity.y);
-                currentState = State.Jump;
-                _aiState = AIState.Run;
-            }
-
-            _photonView.RPC("SyncPlayerPosition", RpcTarget.All, transform.position);
-            _photonView.RPC("SetState", RpcTarget.All, (int)currentState);
-            _photonView.RPC("SyncPlayerScale", RpcTarget.All, transform.localScale);
+            _animator.SetInteger("State", (int)currentState);
         }
 
         // Align text scale locally to match direction without mirroring
@@ -203,27 +187,35 @@ public class NarutoClone : MonoBehaviourPunCallbacks
             _playerNameText.transform.localScale = new Vector2(-1, 1);
             _champNameText.transform.localScale = new Vector2(-1, 1);
         }
+
+        // Match the active state of the real player's intrinsic prefab
+        if (IntrinsicSkill != null)
+        {
+            if (_realNaruto == null)
+            {
+                GameObject realPlayer = GameObject.FindWithTag(_ofPlayer);
+                if (realPlayer != null)
+                {
+                    _realNaruto = realPlayer.GetComponent<NarutoPrefab>();
+                }
+            }
+
+            if (_realNaruto != null && _realNaruto._intrinsicPrefab != null)
+            {
+                IntrinsicSkill.SetActive(_realNaruto._intrinsicPrefab.activeSelf);
+            }
+        }
     }
 
     public void TakeDamage(float damage)
     {
-        _photonView.RPC("ApplyDamageRPC", RpcTarget.All, damage);
+        photonView.RPC("ApplyDamageRPC", RpcTarget.All, damage);
     }
 
     [PunRPC]
     private void ApplyDamageRPC(float damage)
     {
         _health -= damage;
-
-        // Apply fake damage in Game class so opponent's HUD updates
-        if (gameObject.tag == "Player01")
-        {
-            _game.fakeDamagePlayer01 += damage;
-        }
-        else if (gameObject.tag == "Player02")
-        {
-            _game.fakeDamagePlayer02 += damage;
-        }
 
         if (_health <= 0)
         {
@@ -249,20 +241,10 @@ public class NarutoClone : MonoBehaviourPunCallbacks
             if (gameObject.tag == "Player01")
             {
                 _game.activeClonesPlayer01.Remove(this);
-                // Reset fake damage when the last clone of Player01 is gone
-                if (_game.activeClonesPlayer01.Count == 0)
-                {
-                    _game.fakeDamagePlayer01 = 0f;
-                }
             }
             else if (gameObject.tag == "Player02")
             {
                 _game.activeClonesPlayer02.Remove(this);
-                // Reset fake damage when the last clone of Player02 is gone
-                if (_game.activeClonesPlayer02.Count == 0)
-                {
-                    _game.fakeDamagePlayer02 = 0f;
-                }
             }
         }
     }
@@ -273,7 +255,7 @@ public class NarutoClone : MonoBehaviourPunCallbacks
         {
             _isGrounded = true;
         }
-        if (collision.gameObject.CompareTag("Skill") || collision.gameObject.CompareTag("Attack") || collision.gameObject.name.Contains("Skill") || collision.gameObject.name.Contains("Attack") || collision.gameObject.name.Contains("Power"))
+        if (collision.gameObject.name.Contains("Skill") || collision.gameObject.name.Contains("Attack") || collision.gameObject.name.Contains("Power") || collision.gameObject.name.Contains("Kunai") || collision.gameObject.name.Contains("Intrinsic"))
         {
             _game.RegisterCloneHit(this, tag);
         }
@@ -285,7 +267,7 @@ public class NarutoClone : MonoBehaviourPunCallbacks
         {
             _isGrounded = true;
         }
-        if (collision.CompareTag("Skill") || collision.CompareTag("Attack") || collision.gameObject.name.Contains("Skill") || collision.gameObject.name.Contains("Attack") || collision.gameObject.name.Contains("Power"))
+        if (collision.gameObject.name.Contains("Skill") || collision.gameObject.name.Contains("Attack") || collision.gameObject.name.Contains("Power") || collision.gameObject.name.Contains("Kunai") || collision.gameObject.name.Contains("Intrinsic"))
         {
             _game.RegisterCloneHit(this, tag);
         }

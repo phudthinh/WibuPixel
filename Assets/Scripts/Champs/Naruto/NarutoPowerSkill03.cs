@@ -26,7 +26,7 @@ public class NarutoPowerSkill03 : MonoBehaviourPunCallbacks
     void Awake()
     {
         _game = GameObject.Find("GameScript").GetComponent<Game>();
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

@@ -200,7 +200,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
 
     private void Start()
     {
-        _photonView = GetComponent<PhotonView>();
+        _photonView = photonView;
         _rb = GetComponent<Rigidbody2D>();
         _game = GameObject.Find("GameScript").GetComponent<Game>();
         _photonView.RPC("SetPlayerInfo", RpcTarget.All);
@@ -243,7 +243,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
             UpdateProperties();
             _endGame = _game.GetEndGame();
         }
-        if(PhotonNetwork.LocalPlayer.Equals(_photonView.Owner))
+        if(_photonView.IsMine)
         {
             _photonView.RPC("SyncPlayerPosition", RpcTarget.All, transform.position);
             _photonView.RPC("SetState", RpcTarget.All, (int)currentState);
@@ -253,7 +253,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
     }
     private void StartProperties()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             _damage = PlayerPrefs.GetFloat("Damage");
             _defense = PlayerPrefs.GetFloat("Defense");
@@ -369,7 +369,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
     private IEnumerator StartPlayer()
     {
         yield return new WaitForSeconds(4.0f);
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             canControl = true;
         }
@@ -1143,12 +1143,12 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
     public void UpdateIntrinsic(float value)
     {
         valueIntrinsic += value * UnityEngine.Time.deltaTime;
-        if (valueIntrinsic >= 5)
+        if (valueIntrinsic >= 2)
         {
             if(this.gameObject.tag == "Player01")
             {
-                float value_health = _game.GetHealthMaxPlayer01() * 3 / 100;
-                float value_mana = _game.GetManaMaxPlayer01() * 3 / 100;
+                float value_health = _game.GetHealthMaxPlayer01() * 1 / 100;
+                float value_mana = _game.GetManaMaxPlayer01() * 1 / 100;
                 _game.TakePlusHealthPlayer01(value_health);
                 _game.TakePlusManaPlayer01(value_mana);
                 if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
@@ -1169,8 +1169,8 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
             }
             else if(this.gameObject.tag == "Player02")
             {
-                float value_health = _game.GetHealthMaxPlayer02() * 3 / 100;
-                float value_mana = _game.GetManaMaxPlayer02() * 3 / 100;
+                float value_health = _game.GetHealthMaxPlayer02() * 1 / 100;
+                float value_mana = _game.GetManaMaxPlayer02() * 1 / 100;
                 _game.TakePlusHealthPlayer02(value_health);
                 _game.TakePlusManaPlayer02(value_mana);
                 if(PlayerPrefs.GetInt(HiddenDamageKey) == 0)
@@ -1260,13 +1260,6 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         _UISkill04Frame = GameObject.Find("UISkill04Frame");
         _UISpellFrame = GameObject.Find("UISpellFrame");
 
-        _UIIntrinsicFrame.SetActive(false);
-        _UISkill01Frame.SetActive(false);
-        _UISkill02Frame.SetActive(false);
-        _UISkill03Frame.SetActive(false);
-        _UISkill04Frame.SetActive(false);
-        _UISpellFrame.SetActive(false);
-
         _textShowTimeCooldownIntrinsic = GameObject.Find("TextShowTimeCooldownIntrinsic").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill01 = GameObject.Find("TextShowTimeCooldownSkill01").GetComponent<TextMeshProUGUI>();
         _textShowTimeCooldownSkill02 = GameObject.Find("TextShowTimeCooldownSkill02").GetComponent<TextMeshProUGUI>();
@@ -1281,6 +1274,20 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSkill04 = GameObject.Find("ObjectTimeCooldownSkill04");
         _objectTimeCooldownSpell = GameObject.Find("ObjectTimeCooldownSpell");
 
+        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
+        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
+        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
+        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
+        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
+        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
+
+        _UIIntrinsicFrame.SetActive(false);
+        _UISkill01Frame.SetActive(false);
+        _UISkill02Frame.SetActive(false);
+        _UISkill03Frame.SetActive(false);
+        _UISkill04Frame.SetActive(false);
+        _UISpellFrame.SetActive(false);
+
         _objectTimeCooldownIntrinsic.SetActive(false);
         _objectTimeCooldownSkill01.SetActive(false);
         _objectTimeCooldownSkill02.SetActive(false);
@@ -1289,13 +1296,6 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         _objectTimeCooldownSpell.SetActive(false);
 
         _currentSpell = PlayerPrefs.GetString("Spell");
-
-        _imageSpell = GameObject.Find("SpellFrame").GetComponent<Image>();
-        _imageIntrinsic = GameObject.Find("IntrinsicFrame").GetComponent<Image>();
-        _imageSkill01 = GameObject.Find("Skill01Frame").GetComponent<Image>();
-        _imageSkill02 = GameObject.Find("Skill02Frame").GetComponent<Image>();
-        _imageSkill03 = GameObject.Find("Skill03Frame").GetComponent<Image>();
-        _imageSkill04 = GameObject.Find("Skill04Frame").GetComponent<Image>();
 
         _textTitleIntrinsic.text = PlayerPrefs.GetString("TitleIntrinsic");
         _textTitleSkill01.text = PlayerPrefs.GetString("TitleSkill01");
@@ -1366,7 +1366,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
     }
     IEnumerator Healing()
     {
-        if (PhotonNetwork.LocalPlayer.Equals(photonView.Owner))
+        if (photonView.IsMine)
         {
             while (!_endGame)
             {
@@ -1376,7 +1376,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
                 if(this.gameObject.tag == "Player01")
                 {
                     float _plusHealth = _game.GetHealingPlayer01();
-                    float _plusMana = _game.GetRestoreManaPlayer01();
+                    float _plusMana = _game.GetRestoreManaPlayer01() + 5f;
                     _game.TakePlusHealthPlayer01(_plusHealth);
                     _game.TakePlusManaPlayer01(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer01() * 5 / 100)
@@ -1394,7 +1394,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
                 else if(this.gameObject.tag == "Player02")
                 {
                     float _plusHealth = _game.GetHealingPlayer02();
-                    float _plusMana = _game.GetRestoreManaPlayer02();
+                    float _plusMana = _game.GetRestoreManaPlayer02() + 5f;
                     _game.TakePlusHealthPlayer02(_plusHealth);
                     _game.TakePlusManaPlayer02(_plusMana);
                     if(_plusHealth >= _game.GetHealthMaxPlayer02() * 5 / 100)
@@ -1454,7 +1454,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         Attack attackComponent = _attack.GetComponent<Attack>();
         if (attackComponent != null)
         {
-            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            attackComponent.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1466,7 +1466,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         SonGokuPowerSkill01 powerSkill01Component = _powerSkill01.GetComponent<SonGokuPowerSkill01>();
         if (powerSkill01Component != null)
         {
-            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill01Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1478,7 +1478,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         SonGokuPowerSkill02 powerSkill02Component = _powerSkill02.GetComponent<SonGokuPowerSkill02>();
         if (powerSkill02Component != null)
         {
-            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill02Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
     [PunRPC]
@@ -1490,7 +1490,7 @@ public class SonGokuPrefab : MonoBehaviourPunCallbacks
         SonGokuPowerSkill04 powerSkill04Component = _powerSkill04.GetComponent<SonGokuPowerSkill04>();
         if (powerSkill04Component != null)
         {
-            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, PhotonNetwork.LocalPlayer.Equals(_photonView.Owner));
+            powerSkill04Component.SetAttackInfo(this.gameObject.tag, timeHitbox, _photonView.IsMine);
         }
     }
 
