@@ -178,6 +178,25 @@ public class Game : MonoBehaviourPunCallbacks
     public Image _imageThumbnailPlayer02;
 
     private TextMeshProUGUI _pingText;
+
+    public List<NarutoClone> activeClonesPlayer01 = new List<NarutoClone>();
+    public List<NarutoClone> activeClonesPlayer02 = new List<NarutoClone>();
+    public float fakeDamagePlayer01 = 0f;
+    public float fakeDamagePlayer02 = 0f;
+    public NarutoClone _cloneHitPlayer01ThisFrame;
+    public NarutoClone _cloneHitPlayer02ThisFrame;
+
+    public void RegisterCloneHit(NarutoClone clone, string tag)
+    {
+        if (tag == "Player01")
+        {
+            _cloneHitPlayer01ThisFrame = clone;
+        }
+        else if (tag == "Player02")
+        {
+            _cloneHitPlayer02ThisFrame = clone;
+        }
+    }
     private TextMeshProUGUI _fpsText;
     private TextMeshProUGUI _timeText;
     private float _timeGame;
@@ -307,6 +326,12 @@ public class Game : MonoBehaviourPunCallbacks
         _voiceSound.ToList().ForEach(sound => sound.volume = _sliderVoice.value);
         _effectSound.ToList().ForEach(sound => sound.volume = _sliderSound.value);
 
+    }
+
+    void LateUpdate()
+    {
+        _cloneHitPlayer01ThisFrame = null;
+        _cloneHitPlayer02ThisFrame = null;
     }
 
     IEnumerator MaxHhealthManaPlayer()
@@ -874,8 +899,26 @@ public class Game : MonoBehaviourPunCallbacks
     {
         _damagePlayer01Text.text = GetFormattedAttributeText("Công", _damagePlayer01);
         _defensePlayer01Text.text = GetFormattedAttributeText("Phòng thủ", _defensePlayer01);
-        _healthMaxPlayer01Text.text = _healthMaxPlayer01.ToString("###,###");
-        _healthPlayer01Text.text = _healthPlayer01.ToString("###,###");
+        
+        float displayedHealth = _healthPlayer01;
+        float displayedMaxHealth = _healthMaxPlayer01;
+
+        if (localPlayer != null && localPlayer.tag == "Player01" && activeClonesPlayer01.Count > 0)
+        {
+            var firstClone = activeClonesPlayer01[0];
+            if (firstClone != null)
+            {
+                displayedHealth = firstClone.GetHealth();
+                displayedMaxHealth = 50f;
+            }
+        }
+        else if (localPlayer != null && localPlayer.tag == "Player02")
+        {
+            displayedHealth = Mathf.Max(0f, _healthPlayer01 - fakeDamagePlayer01);
+        }
+
+        _healthMaxPlayer01Text.text = displayedMaxHealth.ToString("###,###");
+        _healthPlayer01Text.text = displayedHealth.ToString("###,###");
         _healingPlayer01Text.text = GetFormattedAttributeText("Hồi máu", _healingPlayer01) + "/s";
         _manaMaxPlayer01Text.text = _manaMaxPlayer01.ToString("###,###");
         _manaPlayer01Text.text = _manaPlayer01.ToString("###,###");
@@ -893,11 +936,12 @@ public class Game : MonoBehaviourPunCallbacks
         _stunPlayer01Text.text = GetFormattedAttributeText("Bất động", _stunPlayer01) + "%";
         
 
-        healthDelayBarPlayer01.SetHealth(_healthPlayer01);
+        healthDelayBarPlayer01.SetMaxHealth(displayedMaxHealth);
+        healthDelayBarPlayer01.SetHealth(displayedHealth);
         manaDelayBarPlayer01.SetHealth(_manaPlayer01);
 
-        healthBarPlayer01.SetMaxHealth(_healthMaxPlayer01);
-        healthBarPlayer01.SetHealth(_healthPlayer01);
+        healthBarPlayer01.SetMaxHealth(displayedMaxHealth);
+        healthBarPlayer01.SetHealth(displayedHealth);
 
         manaBarPlayer01.SetMaxHealth(_manaMaxPlayer01);
         manaBarPlayer01.SetHealth(_manaPlayer01);
@@ -908,8 +952,26 @@ public class Game : MonoBehaviourPunCallbacks
     {
         _damagePlayer02Text.text = GetFormattedAttributeText("Công", _damagePlayer02);
         _defensePlayer02Text.text = GetFormattedAttributeText("Phòng thủ", _defensePlayer02);
-        _healthMaxPlayer02Text.text = _healthMaxPlayer02.ToString("###,###");
-        _healthPlayer02Text.text =  _healthPlayer02.ToString("###,###");
+        
+        float displayedHealth = _healthPlayer02;
+        float displayedMaxHealth = _healthMaxPlayer02;
+
+        if (localPlayer != null && localPlayer.tag == "Player02" && activeClonesPlayer02.Count > 0)
+        {
+            var firstClone = activeClonesPlayer02[0];
+            if (firstClone != null)
+            {
+                displayedHealth = firstClone.GetHealth();
+                displayedMaxHealth = 50f;
+            }
+        }
+        else if (localPlayer != null && localPlayer.tag == "Player01")
+        {
+            displayedHealth = Mathf.Max(0f, _healthPlayer02 - fakeDamagePlayer02);
+        }
+
+        _healthMaxPlayer02Text.text = displayedMaxHealth.ToString("###,###");
+        _healthPlayer02Text.text =  displayedHealth.ToString("###,###");
         _healingPlayer02Text.text = GetFormattedAttributeText("Hồi máu", _healingPlayer02) + "/s";
         _manaMaxPlayer02Text.text = _manaMaxPlayer02.ToString("###,###");
         _manaPlayer02Text.text = _manaPlayer02.ToString("###,###");
@@ -925,14 +987,15 @@ public class Game : MonoBehaviourPunCallbacks
         _attackSpeedPlayer02Text.text = GetFormattedAttributeText("Tốc đánh", _attackSpeedPlayer02) + "%";
         _reducedTimePlayer02Text.text = GetFormattedAttributeText("Giảm hồi chiêu", _reducedTimePlayer02) + "%";
         _stunPlayer02Text.text = GetFormattedAttributeText("Bất động", _stunPlayer02) + "%";
-
+ 
         
-        healthDelayBarPlayer02.SetHealth(_healthPlayer02);
+        healthDelayBarPlayer02.SetMaxHealth(displayedMaxHealth);
+        healthDelayBarPlayer02.SetHealth(displayedHealth);
         manaDelayBarPlayer02.SetHealth(_manaPlayer02);
-
-        healthBarPlayer02.SetMaxHealth(_healthMaxPlayer02);
-        healthBarPlayer02.SetHealth(_healthPlayer02);
-
+ 
+        healthBarPlayer02.SetMaxHealth(displayedMaxHealth);
+        healthBarPlayer02.SetHealth(displayedHealth);
+ 
         manaBarPlayer02.SetMaxHealth(_manaMaxPlayer02);
         manaBarPlayer02.SetHealth(_manaPlayer02);
     }
@@ -1181,12 +1244,40 @@ public class Game : MonoBehaviourPunCallbacks
     
     public void TakeDamagePlayer01(float damage, float hitWaitTime)
     {
-        _photonView.RPC("SetDamageHurtPlayer01", RpcTarget.All, damage, hitWaitTime);
+        StartCoroutine(ProcessDamagePlayer01(damage, hitWaitTime));
+    }
+
+    private IEnumerator ProcessDamagePlayer01(float damage, float hitWaitTime)
+    {
+        yield return null;
+        if (_cloneHitPlayer01ThisFrame != null)
+        {
+            _cloneHitPlayer01ThisFrame.TakeDamage(damage);
+            _cloneHitPlayer01ThisFrame = null;
+        }
+        else
+        {
+            _photonView.RPC("SetDamageHurtPlayer01", RpcTarget.All, damage, hitWaitTime);
+        }
     }
 
     public void TakeDamagePlayer02(float damage, float hitWaitTime)
     {
-        _photonView.RPC("SetDamageHurtPlayer02", RpcTarget.All, damage, hitWaitTime);
+        StartCoroutine(ProcessDamagePlayer02(damage, hitWaitTime));
+    }
+
+    private IEnumerator ProcessDamagePlayer02(float damage, float hitWaitTime)
+    {
+        yield return null;
+        if (_cloneHitPlayer02ThisFrame != null)
+        {
+            _cloneHitPlayer02ThisFrame.TakeDamage(damage);
+            _cloneHitPlayer02ThisFrame = null;
+        }
+        else
+        {
+            _photonView.RPC("SetDamageHurtPlayer02", RpcTarget.All, damage, hitWaitTime);
+        }
     }
 
     [PunRPC]
