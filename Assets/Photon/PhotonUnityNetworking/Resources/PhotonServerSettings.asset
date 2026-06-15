@@ -1,0 +1,148 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f3758f8f58fdef43803eb9be1df0608, type: 3}
+  m_Name: PhotonServerSettings
+  m_EditorClassIdentifier: 
+  AppSettings:
+    AppIdRealtime: a61deab4-5fd8-42a1-b95e-a12f2d7caedc
+    AppIdFusion: 
+    AppIdChat: 
+    AppIdVoice: 
+    AppVersion: 
+    UseNameServer: 1
+    FixedRegion: 
+    Server: 
+    Port: 0
+    ProxyServer: 
+    Protocol: 0
+    EnableProtocolFallback: 1
+    AuthMode: 0
+    EnableLobbyStatistics: 0
+    NetworkLogging: 1
+  DevRegion: asia
+  PunLogging: 0
+  EnableSupportLogger: 0
+  RunInBackground: 1
+  StartInOfflineMode: 0
+  RpcList:
+  - ClickRpc
+  - DestroyRpc
+  - SyncChampSelection
+  - RequestSceneChangeToGame
+  - KickPlayerRPC
+  - AddChatMessage
+  - MatchFound
+  - SearchRandomPlayer
+  - InitiateRandomSearch
+  - PlayerJoinedSearch
+  - RequestSceneChangeToGameWithOpponent
+  - StartSearchForOpponent
+  - MatchPlayersAndStartGame
+  - RequestFindOpponent
+  - StartGameRPC
+  - StartGameWithOpponent
+  - StartMatch
+  - StartMatchmaking
+  - SetSearchingCustomProperty
+  - AttemptMatchmaking
+  - SearchForMatchmaking
+  - NotifyStartButtonClicked
+  - MarkPlayersAsReady
+  - UpdateReadyPlayersList
+  - AddReadyPlayersList
+  - RemoveReadyPlayersList
+  - OnSceneChangedToGame
+  - PlayerIsReady
+  - UpdatePlayerPosition
+  - SyncPlayerPosition
+  - SetPlayerInfo
+  - SendNoticationLoginRoom
+  - SendNoticationJoinRoom
+  - SendNoticationStartGame
+  - SendNoticationLeaveRoom
+  - SyncPlayerAnimation
+  - SyncPlayerAnimationIdle
+  - SyncPlayerAnimationRun
+  - SetRunningState
+  - SetPlayerObjectActive
+  - SetIdleState
+  - SetStartingState
+  - SetStandState
+  - SetRunState
+  - SetFallState
+  - SetJumpState
+  - SetState
+  - SyncPlayerScale
+  - DestroyThisRPC
+  - SetDustMove
+  - SetDamPlayer01
+  - SetDamPlayer02
+  - SpawnPlayers
+  - SetTag
+  - SetPlayerTagRPC
+  - SetPlayerTag
+  - ShowHitboxAttack
+  - SetHealthPlayer
+  - TakeDamagePlayer01
+  - TakeDamagePlayer02
+  - SetDamagePlayer01
+  - SetDamagePlayer02
+  - UpdatePropertiesPlayer01
+  - UpdatePropertiesPlayer02
+  - UpdateHitTimeWait
+  - SetPropertiesPlayer
+  - SetPropertiesPlayer01
+  - SetPropertiesPlayer02
+  - SetDamageHurtPlayer01
+  - SetDamageHurtPlayer02
+  - ChangeTextColorRPC
+  - InstantiateValueText
+  - UpdateValueText
+  - ShowValueText
+  - ChangeColor
+  - SetValueTextInfoRPC
+  - SetSpellHealth
+  - SetPlusHealthPlayer01
+  - SetPlusHealthPlayer02
+  - SetPlusManaPlayer01
+  - SetPlusManaPlayer02
+  - SetSpell
+  - UnSetSpell
+  - ShowPowerSkill01
+  - DestroyRPC
+  - ShowExplosion
+  - ShowPowerSkill02
+  - ShowPowerSkill04
+  - SetThumbnail
+  - DelayHealth
+  - SetMinusManaPlayer01
+  - SetMinusManaPlayer02
+  - ShowHitboxSkill01
+  - ShowHitboxSkill02
+  - ShowHitboxSkill03
+  - ShowHitboxSkill04
+  - ShowHitboxIntrinsic
+  - SetIntrinsic
+  - UnSetIntrinsic
+  - SetPlusDamPlayer01
+  - SetPlusDamPlayer02
+  - SetSkill03
+  - UnSetSkill03
+  - TimeUnSetSkill03
+  - ShowNarrutoClone
+  - ShowNarutoClone
+  - HideSound
+  - ShowSound
+  - DetroyObject
+  DisableAutoOpenWizard: 1
+  ShowSettings: 0
+  DevRegionSetOnce: 1

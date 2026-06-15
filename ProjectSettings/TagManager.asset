@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Ground
+  - Player01
+  - Player02
+  - Player03
+  - Player04
+  - NamePlayer
+  - NameChamp
+  - Chat
+  - Properties
+  - DameValue
+  - EffectSound
+  - VoiceSound
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - Player
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: BG
+    uniqueID: 355285235
+    locked: 0
+  - name: Ground
+    uniqueID: 32436043
+    locked: 0
+  - name: Skill Back
+    uniqueID: 3624870025
+    locked: 0
+  - name: Player
+    uniqueID: 992752841
+    locked: 0
+  - name: Skill Front
+    uniqueID: 2234038743
+    locked: 0
+  - name: Effect
+    uniqueID: 4161145543
+    locked: 0
+  - name: Explosion
+    uniqueID: 2722058207
+    locked: 0
+  - name: UI
+    uniqueID: 2853887955
+    locked: 0
+  - name: Max
+    uniqueID: 1436821081
+    locked: 0

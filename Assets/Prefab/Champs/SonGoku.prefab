@@ -1,0 +1,170 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2980662754343327792
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5212248221549262042}
+  - component: {fileID: 394845339213482427}
+  - component: {fileID: 3651716245682827678}
+  - component: {fileID: 2285979187439042062}
+  m_Layer: 7
+  m_Name: SonGoku
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5212248221549262042
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2980662754343327792}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.8, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &394845339213482427
+SpriteRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2980662754343327792}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 992752841
+  m_SortingLayer: 4
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 21300000, guid: 515d3a767db65b74484c020039f94d70, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 10.25, y: 10.25}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_MaskInteraction: 0
+  m_SpriteSortPoint: 0
+--- !u!95 &3651716245682827678
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2980662754343327792}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 6a850d5db2ddff1418a72379a7588880, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2285979187439042062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2980662754343327792}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 841d8522f0191794b8b5c8a6ca5fd1ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _damageText: {fileID: 0}
+  _defenseText: {fileID: 0}
+  _healthText: {fileID: 0}
+  _healingText: {fileID: 0}
+  _manaText: {fileID: 0}
+  _restoreManaText: {fileID: 0}
+  _criticalText: {fileID: 0}
+  _criticalDamageText: {fileID: 0}
+  _dodgeText: {fileID: 0}
+  _bloodsuckingText: {fileID: 0}
+  _reducedHealingText: {fileID: 0}
+  _speedText: {fileID: 0}
+  _resistanceText: {fileID: 0}
+  _penetrateText: {fileID: 0}
+  _attackSpeedText: {fileID: 0}
+  _reducedTimeText: {fileID: 0}
+  _stunText: {fileID: 0}
+  _titleIntrinsicText: {fileID: 0}
+  _titleSkill01Text: {fileID: 0}
+  _titleSkill02Text: {fileID: 0}
+  _titleSkill03Text: {fileID: 0}
+  _titleSkill04Text: {fileID: 0}
+  _descriptionIntrinsicText: {fileID: 0}
+  _descriptionSkill01Text: {fileID: 0}
+  _descriptionSkill02Text: {fileID: 0}
+  _descriptionSkill03Text: {fileID: 0}
+  _descriptionSkill04Text: {fileID: 0}
+  _cooldownIntrinsicText: {fileID: 0}
+  _cooldownSkill01Text: {fileID: 0}
+  _cooldownSkill02Text: {fileID: 0}
+  _cooldownSkill03Text: {fileID: 0}
+  _cooldownSkill04Text: {fileID: 0}
+  _manaIntrinsicText: {fileID: 0}
+  _manaSkill01Text: {fileID: 0}
+  _manaSkill02Text: {fileID: 0}
+  _manaSkill03Text: {fileID: 0}
+  _manaSkill04Text: {fileID: 0}
+  _imageIntrinsic: {fileID: 0}
+  _imageSkill01: {fileID: 0}
+  _imageSkill02: {fileID: 0}
+  _imageSkill03: {fileID: 0}
+  _imageSkill04: {fileID: 0}
+  _imageIntrinsicFrame: {fileID: 0}
+  _imageSkill01Frame: {fileID: 0}
+  _imageSkill02Frame: {fileID: 0}
+  _imageSkill03Frame: {fileID: 0}
+  _imageSkill04Frame: {fileID: 0}
+  _UIUser: {fileID: 0}
